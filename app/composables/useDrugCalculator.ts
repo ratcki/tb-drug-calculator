@@ -1,6 +1,6 @@
 /**
  * TB Drug Dosage Calculator
- * Reference: WHO Guidelines for TB Treatment
+ * Reference: DDC Thailand - ตารางที่ 5.1 ขนาดของยาที่แนะนำสำหรับผู้ใหญ่
  */
 import { ref, computed } from 'vue'
 
@@ -8,7 +8,16 @@ export interface Drug {
   id: string
   name: string
   abbr: string
-  dosePerKg: number
+  dosePerKgMin: number
+  dosePerKgMax: number
+  // Weight band doses from DDC Table 5.1
+  weightBands?: {
+    '35-49': number
+    '50-69': number
+    '70+': number
+  }
+  fixedDoseMin?: number
+  fixedDoseMax?: number
   maxDose: number
   tabletSizes: number[]
   type: 'oral' | 'injectable'
@@ -20,20 +29,75 @@ export interface DrugResult extends Drug {
   calculatedDose: number
   formattedDose: string
   tablets: { size: number; count: number }[]
+  useWeightBand: boolean
 }
 
 const DRUGS: Drug[] = [
-  // First-line
-  { id: 'isoniazid', name: 'Isoniazid', abbr: 'H', dosePerKg: 5, maxDose: 300, tabletSizes: [100], type: 'oral', category: 'first-line', egfrNote: 'ไม่ต้องปรับขนาดยา' },
-  { id: 'rifampicin', name: 'Rifampicin', abbr: 'R', dosePerKg: 10, maxDose: 600, tabletSizes: [300, 450], type: 'oral', category: 'first-line', egfrNote: 'ไม่ต้องปรับขนาดยา' },
-  { id: 'pyrazinamide', name: 'Pyrazinamide', abbr: 'Z', dosePerKg: 25, maxDose: 2000, tabletSizes: [500], type: 'oral', category: 'first-line', egfrNote: 'eGFR <30: ให้ 3 ครั้ง/สัปดาห์' },
-  { id: 'ethambutol', name: 'Ethambutol', abbr: 'E', dosePerKg: 15, maxDose: 1600, tabletSizes: [400, 500], type: 'oral', category: 'first-line', egfrNote: 'eGFR <30: ให้ 3 ครั้ง/สัปดาห์' },
-  // Second-line
-  { id: 'levofloxacin-oral', name: 'Levofloxacin (เม็ด)', abbr: 'Lfx', dosePerKg: 12.5, maxDose: 1000, tabletSizes: [500, 750], type: 'oral', category: 'second-line', egfrNote: 'eGFR 20-49: วันเว้นวัน, <20: 500mg วันเว้นวัน' },
-  { id: 'levofloxacin-iv', name: 'Levofloxacin (ฉีด)', abbr: 'Lfx', dosePerKg: 12.5, maxDose: 1000, tabletSizes: [], type: 'injectable', category: 'second-line', egfrNote: 'eGFR 20-49: วันเว้นวัน, <20: 500mg วันเว้นวัน' },
-  { id: 'streptomycin', name: 'Streptomycin', abbr: 'S', dosePerKg: 15, maxDose: 1000, tabletSizes: [], type: 'injectable', category: 'second-line', egfrNote: 'eGFR <30: ให้ 2-3 ครั้ง/สัปดาห์' },
-  { id: 'amikacin', name: 'Amikacin', abbr: 'Am', dosePerKg: 15, maxDose: 1000, tabletSizes: [], type: 'injectable', category: 'second-line', egfrNote: 'eGFR <60: ปรับความถี่การให้ยา' },
+  // First-line (DDC Thailand ตารางที่ 5.1)
+  { 
+    id: 'isoniazid', name: 'Isoniazid', abbr: 'H', 
+    dosePerKgMin: 4, dosePerKgMax: 6, maxDose: 300, 
+    weightBands: { '35-49': 300, '50-69': 300, '70+': 300 },
+    tabletSizes: [100], type: 'oral', category: 'first-line', 
+    egfrNote: 'ไม่ต้องปรับขนาดยา' 
+  },
+  { 
+    id: 'rifampicin', name: 'Rifampicin', abbr: 'R', 
+    dosePerKgMin: 8, dosePerKgMax: 12, maxDose: 600, 
+    weightBands: { '35-49': 450, '50-69': 600, '70+': 600 },
+    tabletSizes: [300, 450], type: 'oral', category: 'first-line', 
+    egfrNote: 'ไม่ต้องปรับขนาดยา' 
+  },
+  { 
+    id: 'pyrazinamide', name: 'Pyrazinamide', abbr: 'Z', 
+    dosePerKgMin: 20, dosePerKgMax: 30, maxDose: 2000, 
+    weightBands: { '35-49': 1000, '50-69': 1500, '70+': 2000 },
+    tabletSizes: [500], type: 'oral', category: 'first-line', 
+    egfrNote: 'eGFR <30: ให้ 3 ครั้ง/สัปดาห์' 
+  },
+  { 
+    id: 'ethambutol', name: 'Ethambutol', abbr: 'E', 
+    dosePerKgMin: 15, dosePerKgMax: 20, maxDose: 1200, 
+    weightBands: { '35-49': 800, '50-69': 1000, '70+': 1200 },
+    tabletSizes: [400, 500], type: 'oral', category: 'first-line', 
+    egfrNote: 'eGFR <30: ให้ 3 ครั้ง/สัปดาห์' 
+  },
+  // Second-line (DDC Thailand / WHO Guidelines)
+  { 
+    id: 'levofloxacin-oral', name: 'Levofloxacin (เม็ด)', abbr: 'Lfx', 
+    dosePerKgMin: 0, dosePerKgMax: 0, 
+    fixedDoseMin: 750, fixedDoseMax: 1000, maxDose: 1000, 
+    tabletSizes: [500, 750], type: 'oral', category: 'second-line', 
+    egfrNote: 'eGFR 20-49: 750mg วันเว้นวัน | <20: 500mg วันเว้นวัน' 
+  },
+  { 
+    id: 'levofloxacin-iv', name: 'Levofloxacin (ฉีด)', abbr: 'Lfx', 
+    dosePerKgMin: 0, dosePerKgMax: 0, 
+    fixedDoseMin: 750, fixedDoseMax: 1000, maxDose: 1000, 
+    tabletSizes: [], type: 'injectable', category: 'second-line', 
+    egfrNote: 'eGFR 20-49: 750mg วันเว้นวัน | <20: 500mg วันเว้นวัน' 
+  },
+  { 
+    id: 'streptomycin', name: 'Streptomycin', abbr: 'S', 
+    dosePerKgMin: 12, dosePerKgMax: 18, maxDose: 1000, 
+    tabletSizes: [], type: 'injectable', category: 'second-line', 
+    egfrNote: 'eGFR <30: ให้ 2-3 ครั้ง/สัปดาห์' 
+  },
+  { 
+    id: 'amikacin', name: 'Amikacin', abbr: 'Am', 
+    dosePerKgMin: 15, dosePerKgMax: 20, maxDose: 1000, 
+    tabletSizes: [], type: 'injectable', category: 'second-line', 
+    egfrNote: 'eGFR <60: ปรับความถี่การให้ยา' 
+  },
 ]
+
+// Get weight band key based on weight
+function getWeightBand(weight: number): '35-49' | '50-69' | '70+' | null {
+  if (weight >= 35 && weight <= 49) return '35-49'
+  if (weight >= 50 && weight <= 69) return '50-69'
+  if (weight >= 70) return '70+'
+  return null // Weight < 35, needs calculation
+}
 
 export function useDrugCalculator() {
   const weight = ref<number | null>(null)
@@ -43,8 +107,25 @@ export function useDrugCalculator() {
   function calculate() {
     if (!weight.value || weight.value <= 0 || weight.value > 200) return false
 
+    const weightBand = getWeightBand(weight.value)
+
     results.value = DRUGS.map(drug => {
-      const dose = Math.min(weight.value! * drug.dosePerKg, drug.maxDose)
+      let dose: number
+      let useWeightBand = false
+
+      // Priority: 1. Fixed dose, 2. Weight band, 3. Calculate
+      if (drug.fixedDoseMin !== undefined && drug.fixedDoseMax !== undefined) {
+        // Fixed dose drugs (e.g., Levofloxacin for TB)
+        dose = drug.fixedDoseMax!
+      } else if (drug.weightBands && weightBand) {
+        // Use DDC weight band table
+        dose = drug.weightBands[weightBand]
+        useWeightBand = true
+      } else {
+        // Calculate by weight (for <35kg or drugs without weight bands)
+        dose = Math.min(weight.value! * drug.dosePerKgMax, drug.maxDose)
+      }
+      
       return {
         ...drug,
         calculatedDose: dose,
@@ -52,7 +133,8 @@ export function useDrugCalculator() {
         tablets: drug.tabletSizes.map(size => ({
           size,
           count: Math.round((dose / size) * 2) / 2 // Round to 0.5
-        }))
+        })),
+        useWeightBand
       }
     })
     hasCalculated.value = true

@@ -4,7 +4,10 @@ interface Props {
     id: string
     name: string
     abbr: string
-    dosePerKg: number
+    dosePerKgMin: number
+    dosePerKgMax: number
+    fixedDoseMin?: number
+    fixedDoseMax?: number
     maxDose: number
     type: 'oral' | 'injectable'
     category: 'first-line' | 'second-line'
@@ -12,31 +15,40 @@ interface Props {
     calculatedDose: number
     formattedDose: string
     tablets: { size: number; count: number }[]
+    useWeightBand: boolean
   }
 }
 
 const props = defineProps<Props>()
 
 const isSecondLine = computed(() => props.drug.category === 'second-line')
-const needsAdjust = computed(() => !props.drug.egfrNote.includes('ไม่ต้อง'))
+const needsAdjust = computed(() => !props.drug.egfrNote.includes('ไม่ต้อง') && !props.drug.egfrNote.includes('ไม่ปรับ'))
+const isFixedDose = computed(() => props.drug.fixedDoseMin !== undefined && props.drug.fixedDoseMax !== undefined)
+
+const dosePerKgDisplay = computed(() => {
+  if (isFixedDose.value) {
+    return `${props.drug.fixedDoseMin}-${props.drug.fixedDoseMax} mg`
+  }
+  return `${props.drug.dosePerKgMin}-${props.drug.dosePerKgMax} mg/kg`
+})
 </script>
 
 <template>
   <div
-    class="bg-white/[0.08] backdrop-blur-[20px] border rounded-xl p-3 flex flex-col gap-2 transition-all duration-300 overflow-hidden"
-    :class="isSecondLine ? 'border-rose-500/30' : 'border-white/15'"
+    class="bg-surface-card backdrop-blur-[20px] border rounded-xl p-3 flex flex-col gap-2 transition-all duration-300 overflow-hidden"
+    :class="isSecondLine ? 'border-rose-500/30' : 'border-border'"
   >
-    <!-- Header with abbr spanning both lines -->
-    <div class="flex gap-2">
+    <!-- Header: abbr + name -->
+    <div class="flex items-center gap-2">
       <span
-        class="flex items-center justify-center w-10 h-10 text-sm font-bold rounded-xl text-white shrink-0 self-center"
+        class="flex items-center justify-center w-10 h-10 text-sm font-bold rounded-xl text-white shrink-0"
         :class="isSecondLine ? 'bg-gradient-to-br from-pink-400 to-rose-500' : 'bg-gradient-to-br from-indigo-500 to-purple-600'"
       >
         {{ drug.abbr }}
       </span>
       <div class="flex-1 min-w-0">
-        <h4 class="text-xs font-semibold leading-tight text-white/90">{{ drug.name }}</h4>
-        <span class="text-xl font-bold text-emerald-500">{{ drug.formattedDose }}</span>
+        <h4 class="text-sm font-semibold leading-tight text-text-primary">{{ drug.name }}</h4>
+        <div class="text-xl font-bold text-emerald-500">{{ drug.formattedDose }}</div>
       </div>
     </div>
 
@@ -59,17 +71,19 @@ const needsAdjust = computed(() => !props.drug.egfrNote.includes('ไม่ต�
     <!-- Spacer to push items to bottom -->
     <div class="flex-grow"></div>
 
-    <!-- eGFR Note - Above formula -->
+    <!-- eGFR Note -->
     <p
-      class="text-[10px] leading-tight"
+      class="text-[10px] leading-tight flex items-start gap-1"
       :class="needsAdjust ? 'text-red-400' : 'text-emerald-500/70'"
     >
-      🩺 {{ drug.egfrNote }}
+      <img src="/kidneys.svg" alt="Kidney" class="w-3 h-3 shrink-0 mt-0.5" />
+      <span>{{ drug.egfrNote }}</span>
     </p>
 
-    <!-- Formula - Always at bottom -->
-    <p class="text-[9px] text-white/30 border-t border-white/10 pt-2">
-      {{ drug.dosePerKg }} mg/kg (max {{ drug.maxDose }} mg)
+    <!-- Formula -->
+    <p class="text-[9px] text-text-muted border-t border-border-light pt-2">
+      {{ dosePerKgDisplay }} (max {{ drug.maxDose }} mg)
     </p>
   </div>
 </template>
+

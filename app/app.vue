@@ -34,7 +34,7 @@ watch(weight, (val) => {
             TB Drug Calculator
           </h1>
         </div>
-        <p class="text-white/60 text-xs sm:text-sm">เครื่องคำนวณขนาดยาวัณโรคตามน้ำหนักตัว</p>
+        <p class="text-white/60 text-xs sm:text-sm">เครื่องคำนวณขนาดยาวัณโรค</p>
       </header>
 
       <!-- Weight Input -->
@@ -96,7 +96,12 @@ watch(weight, (val) => {
 
       <!-- Disclaimer -->
       <p class="mt-4 text-[10px] text-white/40 text-center">
-        ⚠️ ผลการคำนวณเป็นค่าประมาณตาม WHO โปรดปรึกษาแพทย์ก่อนใช้ยา
+        ⚠️ ผลการคำนวณเป็นค่าประมาณตาม <a href="https://www.who.int/publications/i/item/9789240048126" target="_blank" rel="noopener noreferrer" class="underline hover:text-white/60 transition-colors">WHO</a> และ <a href="https://ddc.moph.go.th/uploads/publish/1253220220330064337.pdf" target="_blank" rel="noopener noreferrer" class="underline hover:text-white/60 transition-colors">DDC</a> โปรดปรึกษาแพทย์ก่อนใช้ยา
+      </p>
+
+      <!-- Footer -->
+      <p class="mt-2 text-[9px] text-white/30 text-center">
+        ⚡ Developed by ratcki © 2025
       </p>
     </div>
   </div>
