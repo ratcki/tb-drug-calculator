@@ -13,6 +13,8 @@ interface Props {
     category: 'first-line' | 'second-line'
     egfrNote: string
     calculatedDose: number
+    calculatedDoseMin: number
+    calculatedDoseMax: number
     formattedDose: string
     tablets: { size: number; count: number }[]
     useWeightBand: boolean
@@ -30,6 +32,16 @@ const dosePerKgDisplay = computed(() => {
     return `${props.drug.fixedDoseMin}-${props.drug.fixedDoseMax} mg`
   }
   return `${props.drug.dosePerKgMin}-${props.drug.dosePerKgMax} mg/kg`
+})
+
+const doseMin = computed(() => {
+  if (isFixedDose.value) return null
+  return Math.round(props.drug.calculatedDoseMin)
+})
+
+const doseMax = computed(() => {
+  if (isFixedDose.value) return null
+  return Math.round(props.drug.calculatedDoseMax)
 })
 </script>
 
@@ -49,6 +61,21 @@ const dosePerKgDisplay = computed(() => {
       <div class="flex-1 min-w-0">
         <h4 class="text-sm font-semibold leading-tight text-text-primary">{{ drug.name }}</h4>
         <div class="text-xl font-bold text-emerald-500">{{ drug.formattedDose }}</div>
+      </div>
+    </div>
+
+    <!-- Dose Range (weight-based bounds) -->
+    <div v-if="doseMin && doseMax" class="flex items-center justify-between px-3 py-1.5 text-xs font-medium rounded-lg bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 text-indigo-400">
+      <div class="flex items-center gap-1.5">
+        <span class="text-indigo-400/60 text-[10px]">min</span>
+        <span class="font-semibold">{{ doseMin }}</span>
+      </div>
+      <svg class="w-4 h-4 text-indigo-400/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+      </svg>
+      <div class="flex items-center gap-1.5">
+        <span class="font-semibold">{{ doseMax }}</span>
+        <span class="text-indigo-400/60 text-[10px]">max</span>
       </div>
     </div>
 

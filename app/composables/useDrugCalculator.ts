@@ -27,6 +27,8 @@ export interface Drug {
 
 export interface DrugResult extends Drug {
   calculatedDose: number
+  calculatedDoseMin: number
+  calculatedDoseMax: number
   formattedDose: string
   tablets: { size: number; count: number }[]
   useWeightBand: boolean
@@ -79,7 +81,7 @@ const DRUGS: Drug[] = [
   },
   { 
     id: 'streptomycin', name: 'Streptomycin', abbr: 'S', 
-    dosePerKgMin: 12, dosePerKgMax: 18, maxDose: 1000, 
+    dosePerKgMin: 15, dosePerKgMax: 25, maxDose: 1000, 
     tabletSizes: [], type: 'injectable', category: 'second-line', 
     egfrNote: 'eGFR <30: ให้ 2-3 ครั้ง/สัปดาห์' 
   },
@@ -113,6 +115,10 @@ export function useDrugCalculator() {
       let dose: number
       let useWeightBand = false
 
+      // Calculate lower and upper bounds based on weight
+      const doseMin = Math.min(weight.value! * drug.dosePerKgMin, drug.maxDose)
+      const doseMax = Math.min(weight.value! * drug.dosePerKgMax, drug.maxDose)
+
       // Priority: 1. Fixed dose, 2. Weight band, 3. Calculate
       if (drug.fixedDoseMin !== undefined && drug.fixedDoseMax !== undefined) {
         // Fixed dose drugs (e.g., Levofloxacin for TB)
@@ -129,6 +135,8 @@ export function useDrugCalculator() {
       return {
         ...drug,
         calculatedDose: dose,
+        calculatedDoseMin: doseMin,
+        calculatedDoseMax: doseMax,
         formattedDose: `${Math.round(dose)} mg`,
         tablets: drug.tabletSizes.map(size => ({
           size,
