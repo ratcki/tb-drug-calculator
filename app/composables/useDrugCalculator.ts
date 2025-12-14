@@ -80,12 +80,6 @@ const DRUGS: Drug[] = [
     egfrNote: 'eGFR 20-49: 750mg วันเว้นวัน | <20: 500mg วันเว้นวัน' 
   },
   { 
-    id: 'streptomycin', name: 'Streptomycin', abbr: 'S', 
-    dosePerKgMin: 15, dosePerKgMax: 25, maxDose: 1000, 
-    tabletSizes: [], type: 'injectable', category: 'second-line', 
-    egfrNote: 'eGFR <30: ให้ 2-3 ครั้ง/สัปดาห์' 
-  },
-  { 
     id: 'amikacin', name: 'Amikacin', abbr: 'Am', 
     dosePerKgMin: 15, dosePerKgMax: 20, maxDose: 1000, 
     tabletSizes: [], type: 'injectable', category: 'second-line', 
