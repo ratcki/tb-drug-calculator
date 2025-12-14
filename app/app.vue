@@ -34,7 +34,7 @@ watch(weight, (val) => {
             TB Drug Calculator
           </h1>
         </div>
-        <p class="text-white/60 text-xs sm:text-sm">เครื่องคำนวณขนาดยาวัณโรค</p>
+        <p class="text-white/60 text-xs sm:text-sm">เครื่องคำนวณขนาดยาวัณโรค (อายุมากกว่า 15 ปี)</p>
       </header>
 
       <!-- Weight Input -->
