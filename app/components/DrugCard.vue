@@ -29,7 +29,13 @@ const isFixedDose = computed(() => props.drug.fixedDoseMin !== undefined && prop
 
 const dosePerKgDisplay = computed(() => {
   if (isFixedDose.value) {
+    if (props.drug.fixedDoseMin === props.drug.fixedDoseMax) {
+      return `${props.drug.fixedDoseMin} mg`
+    }
     return `${props.drug.fixedDoseMin}-${props.drug.fixedDoseMax} mg`
+  }
+  if (props.drug.dosePerKgMin === props.drug.dosePerKgMax) {
+    return `${props.drug.dosePerKgMin} mg/kg`
   }
   return `${props.drug.dosePerKgMin}-${props.drug.dosePerKgMax} mg/kg`
 })

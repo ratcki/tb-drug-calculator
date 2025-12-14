@@ -68,16 +68,16 @@ const DRUGS: Drug[] = [
   { 
     id: 'levofloxacin-oral', name: 'Levofloxacin (เม็ด)', abbr: 'Lfx', 
     dosePerKgMin: 0, dosePerKgMax: 0, 
-    fixedDoseMin: 750, fixedDoseMax: 1000, maxDose: 1000, 
+    fixedDoseMin: 750, fixedDoseMax: 750, maxDose: 750, 
     tabletSizes: [500, 750], type: 'oral', category: 'second-line', 
-    egfrNote: 'eGFR 20-49: 750mg วันเว้นวัน | <20: 500mg วันเว้นวัน' 
+    egfrNote: 'ไม่ปรับขนาดยาตามน้ำหนัก | eGFR <50: ปรับขนาดตาม CrCl' 
   },
   { 
     id: 'levofloxacin-iv', name: 'Levofloxacin (ฉีด)', abbr: 'Lfx', 
     dosePerKgMin: 0, dosePerKgMax: 0, 
-    fixedDoseMin: 750, fixedDoseMax: 1000, maxDose: 1000, 
+    fixedDoseMin: 750, fixedDoseMax: 750, maxDose: 750, 
     tabletSizes: [], type: 'injectable', category: 'second-line', 
-    egfrNote: 'eGFR 20-49: 750mg วันเว้นวัน | <20: 500mg วันเว้นวัน' 
+    egfrNote: 'ไม่ปรับขนาดยาตามน้ำหนัก | eGFR <50: ปรับขนาดตาม CrCl' 
   },
   { 
     id: 'amikacin', name: 'Amikacin', abbr: 'Am', 
